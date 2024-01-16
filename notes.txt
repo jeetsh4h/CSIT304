@@ -1,0 +1,9 @@
+Follow Moodle to install OpenGL,,,
+use python 3.11 abd manually download all the wheel files
+
+Line Drawing Algorithm 
+
+Know the derivation of the Bresenham's Algorithm
+- for both m > 1 and m <= 1
+
+TODO: Finish wokring on Bresenham's Algorithm
