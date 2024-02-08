@@ -14,6 +14,7 @@ def encode_point(x, y):
     if x < xmin:
         # set last bit to 1
         code |= 1                           # 1 is 0001
+    
     elif x > xmax:
         # set second last bit to 1
         code |= 2                           # 2 is 0010
@@ -21,11 +22,13 @@ def encode_point(x, y):
     if y < ymin:
         # set second bit to 1
         code |= 4                           # 4 is 0100
+    
     elif y > ymax:
         # set first bit to 1
         code |= 8                           # 8 is 1000
     
     return code
+
 
 def kohen_sutherland(point_a, point_b):
     x1, y1 = point_a
@@ -34,37 +37,33 @@ def kohen_sutherland(point_a, point_b):
     code_a = encode_point(x1, y1)
     code_b = encode_point(x2, y2)
 
-    if code_a == 0 and code_b == 0:
-        # trivially accepted
-        return point_a, point_b
-
-    if code_a & code_b != 0:
-        # trivially rejected
-        return None, None
-
     while True:
-        if code_a:
-            code_out = code_a
-            x_out, y_out = point_a
-        else:
-            code_out = code_b
-            x_out, y_out = point_b
+        if code_a == 0 and code_b == 0:
+            # trivially accepted
+            return point_a, point_b
 
-        # Compute the intersection of the line with the viewport boundary
+        if code_a & code_b != 0:
+            # trivially rejected
+            return None, None
+
+        code_out = code_a if code_a else code_b
+
         if code_out & 1:  # left
             x = viewport_coordinates[0]
-            y = y_out + (ymax - y_out) * (x - x_out) / (x_in - x_out)
+            y = y1 + (y2 - y1) * (x - x1) / (x2 - x1)
+        
         elif code_out & 2:  # right
             x = viewport_coordinates[1]
-            y = y_out + (ymax - y_out) * (x - x_out) / (x_in - x_out)
+            y = y1 + (y2 - y1) * (x - x1) / (x2 - x1)
+        
         elif code_out & 4:  # bottom
             y = viewport_coordinates[2]
-            x = x_out + (x_in - x_out) * (y - y_out) / (ymax - y_out)
+            x = x1 + (x2 - x1) * (y - y1) / (y2 - y1)
+        
         elif code_out & 8:  # top
             y = viewport_coordinates[3]
-            x = x_out + (x_in - x_out) * (y - y_out) / (ymax - y_out)
+            x = x1 + (x2 - x1) * (y - y1) / (y2 - y1)
 
-        # Replace the point outside the viewport with the intersection point
         if code_out == code_a:
             point_a = (x, y)
             code_a = encode_point(x, y)
@@ -115,8 +114,8 @@ def main():
 
 
     global line_start, line_end
-    line_start = (300, 300)
-    line_end = (100, -200)
+    line_start = (-300, 100)
+    line_end = (100, 700)
 
     glutDisplayFunc(viewport)
 
