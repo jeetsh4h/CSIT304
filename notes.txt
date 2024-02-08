@@ -6,4 +6,10 @@ Line Drawing Algorithm
 Know the derivation of the Bresenham's Algorithm
 - for both m > 1 and m <= 1
 
-TODO: Finish wokring on Bresenham's Algorithm
+TODO: Finish wokring on Bresenham's 
+
+
+
+
+3-D to 2-D projection is essentially dimensionality reduction
+using your eyes is essentially projection
