@@ -2,96 +2,107 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
-
-from OpenGL.GL import *
-from OpenGL.GLUT import *
-from OpenGL.GLU import *
+from copy import deepcopy
 
 ### global variables
 # viewport coordinates
 xmin = -300; xmax = 100; ymin = -100; ymax = 300
 
+# intializing input polygon, to feed into clipping algorithm
+# this is for convenience, easily updatable
+polygon = []
 
-# outcode constants
-INSIDE = 0  # 0000
-LEFT = 1    # 0001
-RIGHT = 2   # 0010
-BOTTOM = 4  # 0100
-TOP = 8     # 1000
-
-def encode_point(x, y):
-    outcode = INSIDE
-
-    if x < xmin:        # to the left of clip window
-        outcode |= LEFT
-    elif x > xmax:      # to the right of clip window
-        outcode |= RIGHT
-
-    if y < ymin:        # below the clip window
-        outcode |= BOTTOM
-    elif y > ymax:      # above the clip window
-        outcode |= TOP
-    
-    return outcode
-
-def cohen_sutherland_line_clip(x1, y1, x2, y2):
-    outcode1 = encode_point(x1, y1)
-    outcode2 = encode_point(x2, y2)
-
-    while True:
-        if not (outcode1 | outcode2):
-            # bitwise OR is 0 therefore, both points inside window
-            # trivially accept and return original points
-            return (x1, y1), (x2, y2)
-
-        elif outcode1 & outcode2:
-            # bitwise AND is not 0 therefore, both points share an outside area
-            # trivially reject and return Nones
-            return None, None
+def compute_intersection(p1, p2, edge):
+    match edge:
+        case 'l':
+            m = (p2[1] - p1[1]) / (p2[0] - p1[0])
+            
+            int_x = xmin
+            int_y = m * xmin + p1[1] - m * p1[0]
         
-        else:
-            # failed both tests, so calculate the line segment to clip
-            # from an outside point to an intersection with clip edge
+        case 'r':
+            m = (p2[1] - p1[1]) / (p2[0] - p1[0])
             
-            # pick outside point, pick non-zero outcode
-            outcodeOut = outcode1 if outcode1 else outcode2
-            curr_x = 0; curr_y = 0
+            int_x = xmax
+            int_y = m * xmin + p1[1] - m * p1[0]
 
-        # bitwise ANDing resulting in non-zero value
-        # means that the point is outside the viewport
-        # so we need to clip it, based on that viewport edge
-            # the formula below is calculating intersection point
-            # between the line and the viewport edge
-            if outcodeOut & TOP:
-                # point is above the clip window
-                curr_x = x1 + (x2 - x1) * (ymax - y1) / (y2 - y1)
-                curr_y = ymax
+        case 'b':
+            mi = (p2[0] - p1[0]) / (p2[1] - p1[1])
 
-            elif outcodeOut & BOTTOM:
-                # point is below the clip window
-                curr_x = x1 + (x2 - x1) * (ymin - y1) / (y2 - y1)
-                curr_y = ymin
+            int_x = 
+            int_y = ymin
+        
+        case 't':
+            mi = (p2[0] - p1[0]) / (p2[1] - p1[1])
             
-            elif outcodeOut & RIGHT:
-                # point is to the right of clip window
-                curr_x = xmax
-                curr_y = y1 + (y2 - y1) * (xmax - x1) / (x2 - x1)
+            int_x = 
+            int_y = ymax
+
+    return (int_x, int_y)
+
+def clip_againt_edge(curr_polygon, edge):
+    clipped_polygon = []
+    
+    for p1, p2 in zip(curr_polygon, curr_polygon[1:] + [curr_polygon[0]]):
+        match edge:
+            case 'l':
+                if p1[0] > xmin:
+                    # first point inside
+                    if p2[0] > xmin:
+                        # second point inside
+                        clipped_polygon.append(p2)
+                    else:
+                        # second point outside
+                        clipped_polygon.append(
+                            compute_intersection(p1, p2, edge)
+                        )
             
-            elif outcodeOut & LEFT:
-                # point is to the left of clip window
-                curr_x = xmin
-                curr_y = y1 + (y2 - y1) * (xmin - x1) / (x2 - x1)
+            case 'r':
+                if p1[0] < xmax:
+                    # first point inside
+                    if p2[0] < xmax:
+                        # second point inside
+                        clipped_polygon.append(p2)
+                    else:
+                        # second point outside
+                        clipped_polygon.append(
+                            compute_intersection(p1, p2, edge)
+                        )
+            
+            case 'b':
+                if p1[1] > ymin:
+                    # first point inside
+                    if p2[1] > ymin:
+                        # second point inside
+                        clipped_polygon.append(p2)
+                    else:
+                        # second point outside
+                        clipped_polygon.append(
+                            compute_intersection(p1, p2, edge)
+                        )
 
-            if outcodeOut == outcode1:  # pointOut == (x1, y1)
-                x1, y1 = curr_x, curr_y
-                outcode1 = encode_point(x1, y1)
-            else: # pointOut == (x2, y2) 
-                x2, y2 = curr_x, curr_y
-                outcode2 = encode_point(x2, y2)
+            case 't':
+                if p1[1] < ymax:
+                    # first point inside
+                    if p2[1] < ymax:
+                        # second point inside
+                        clipped_polygon.append(p2)
+                    else:
+                        # second point outside
+                        clipped_polygon.append(
+                            compute_intersection(p1, p2, edge)
+                        )
 
+    return clipped_polygon
 
-def clip_polygon():
-    NotImplemented
+def sutherland_hodgman_polygon_clip():
+    clip_polygon = deepcopy(polygon)
+
+    # codes for each edge
+    for edge in ['l', 'r', 'b', 't']:
+        clip_polygon = clip_againt_edge(clip_polygon, edge)
+
+    return clip_polygon
 
 def draw_clipped_polygon():
     NotImplemented
