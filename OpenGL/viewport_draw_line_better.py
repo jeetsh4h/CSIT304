@@ -2,15 +2,14 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
-
-from OpenGL.GL import *
-from OpenGL.GLUT import *
-from OpenGL.GLU import *
-
 ### global variables
 # viewport coordinates
 xmin = -300; xmax = 100; ymin = -100; ymax = 300
 
+# initialising line coordinates, to feed into the clipping algorithm
+# this is for convenience, easily updatable
+line_start = (0.0, 0.0)
+line_end = (0.0, 0.0)
 
 # outcode constants
 INSIDE = 0  # 0000
@@ -18,6 +17,7 @@ LEFT = 1    # 0001
 RIGHT = 2   # 0010
 BOTTOM = 4  # 0100
 TOP = 8     # 1000
+
 
 def encode_point(x, y):
     outcode = INSIDE
@@ -33,6 +33,7 @@ def encode_point(x, y):
         outcode |= TOP
     
     return outcode
+
 
 def cohen_sutherland_line_clip(x1, y1, x2, y2):
     outcode1 = encode_point(x1, y1)
@@ -90,12 +91,52 @@ def cohen_sutherland_line_clip(x1, y1, x2, y2):
                 outcode2 = encode_point(x2, y2)
 
 
-def clip_polygon():
-    NotImplemented
+def draw_clipped_line():
+    clip_line_start, clip_line_end = cohen_sutherland_line_clip(*line_start, *line_end)
 
-def draw_clipped_polygon():
-    NotImplemented
+    if (clip_line_start, clip_line_end) == (None, None):
+        print("Line is completely outside the viewport")
+        
+        glLineWidth(3.0)
+        glBegin(GL_LINES)
+        # drawing the parts outside the line
+        glColor3f(1.0, 0.0, 0.0)
 
+        glVertex2f(*line_start)
+        glVertex2f(*line_end)
+        
+        glEnd()
+
+    else:
+        print(f"Point A: {clip_line_start}, Point B: {clip_line_end}")
+
+        glLineWidth(3.0)
+
+        # drawing the parts outside the line
+        glBegin(GL_LINES)
+        glColor3f(1.0, 0.0, 0.0)    # red
+        
+        if clip_line_start != line_start:
+            glVertex2f(*line_start)
+            glVertex2f(*clip_line_start)
+
+        if clip_line_end != line_end:
+            glVertex2f(*clip_line_end)
+            glVertex2f(*line_end)
+
+        glEnd()
+        
+        # drawing the clipped line
+        glBegin(GL_LINES)
+        glColor3f(0.0, 1.0, 0.0)    # green
+
+        glVertex2f(*clip_line_start)
+        glVertex2f(*clip_line_end)
+
+        glEnd()
+
+
+    glFlush()
 
 def viewport():
 # clear screen
@@ -121,6 +162,7 @@ def viewport():
 
     glEnd()
 
+
 def initialize():
     glClearColor(1.0, 1.0, 1.0, 1.0)    # bg color white
     gluOrtho2D(-500, 500, -500, 500)    # full screen
@@ -140,9 +182,19 @@ def main():
     
     # viewport_coordinates = (-300, 100, -100, 300)
     
+    # test cases
+    global line_start, line_end
+    # line_start = (-200, 0); line_end = (-100, 200)
+    # line_start = (300, 200); line_end = (200, 0)
+    # line_start = (-400, -50); line_end = (-250, -150)
+    # line_start = (50, 350); line_end = (150, 250)
+    # line_start = (50, 100); line_end = (150, 100)
+    # line_start = (0, 200); line_end = (0, 350)
+    # line_start = (-350, 0); line_end = (0, -125)
+    line_start = (-250, 250); line_end = (-350, 350)
     
     
-    glutDisplayFunc(draw_clipped_polygon)
+    glutDisplayFunc(draw_clipped_line)
     glutMainLoop()
 
 

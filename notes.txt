@@ -1,15 +1,25 @@
 Follow Moodle to install OpenGL,,,
-use python 3.11 abd manually download all the wheel files
+use python 3.11 and manually download all the wheel files
 
 Line Drawing Algorithm 
 
 Know the derivation of the Bresenham's Algorithm
 - for both m > 1 and m <= 1
 
-TODO: Finish wokring on Bresenham's 
-
-
-
 
 3-D to 2-D projection is essentially dimensionality reduction
 using your eyes is essentially projection
+
+
+the axes are translated in such a way that the transformation about a point P, turns into translation about origin
+essentially apply a translation to every point in such a way that the point P can be treated as the origin
+
+Therefore, you perform negative translation (essentially translate everything to -P) and then the X trabsformation and 
+then translate it back.
+
+
+
+In this class we are assuming that all vectors are represented as a column vector
+Thereore, when multiply the trabsformation matrices, make sure that the first transformation step is on the
+most righthand side part
+
