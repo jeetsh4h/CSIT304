@@ -94,39 +94,24 @@ def cohen_sutherland_line_clip(x1, y1, x2, y2):
 def draw_clipped_line():
     clip_line_start, clip_line_end = cohen_sutherland_line_clip(*line_start, *line_end)
 
+# set line width
+    glLineWidth(3.0)
+
+# drawing line
+    glBegin(GL_LINES)
+    glColor3f(1.0, 0.0, 0.0)    # red
+    
+    glVertex2f(*line_start)
+    glVertex2f(*line_end)
+
+    glEnd()
+
+# drawing clipped line
     if (clip_line_start, clip_line_end) == (None, None):
         print("Line is completely outside the viewport")
-        
-        glLineWidth(3.0)
-        glBegin(GL_LINES)
-        # drawing the parts outside the line
-        glColor3f(1.0, 0.0, 0.0)
-
-        glVertex2f(*line_start)
-        glVertex2f(*line_end)
-        
-        glEnd()
-
-    else:
+    
+    else:    
         print(f"Point A: {clip_line_start}, Point B: {clip_line_end}")
-
-        glLineWidth(3.0)
-
-        # drawing the parts outside the line
-        glBegin(GL_LINES)
-        glColor3f(1.0, 0.0, 0.0)    # red
-        
-        if clip_line_start != line_start:
-            glVertex2f(*line_start)
-            glVertex2f(*clip_line_start)
-
-        if clip_line_end != line_end:
-            glVertex2f(*clip_line_end)
-            glVertex2f(*line_end)
-
-        glEnd()
-        
-        # drawing the clipped line
         glBegin(GL_LINES)
         glColor3f(0.0, 1.0, 0.0)    # green
 
@@ -134,7 +119,6 @@ def draw_clipped_line():
         glVertex2f(*clip_line_end)
 
         glEnd()
-
 
     glFlush()
 
