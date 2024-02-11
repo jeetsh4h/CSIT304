@@ -24,26 +24,28 @@ def compute_intersection(p1, p2, edge):
             m = (p2[1] - p1[1]) / (p2[0] - p1[0])
             
             int_x = xmax
-            int_y = m * xmin + p1[1] - m * p1[0]
+            int_y = m * xmax + p1[1] - m * p1[0]
 
         case 'b':
             mi = (p2[0] - p1[0]) / (p2[1] - p1[1])
 
-            int_x = 
+            int_x = mi * ymin + p1[0] - mi * p1[1]
             int_y = ymin
         
         case 't':
             mi = (p2[0] - p1[0]) / (p2[1] - p1[1])
             
-            int_x = 
+            int_x = mi * ymax + p1[0] - mi * p1[1]
             int_y = ymax
 
+    # print(p1, p2, ":", (int_x, int_y))
     return (int_x, int_y)
 
 def clip_againt_edge(curr_polygon, edge):
     clipped_polygon = []
     
     for p1, p2 in zip(curr_polygon, curr_polygon[1:] + [curr_polygon[0]]):
+        # print(p1, p2, edge)
         match edge:
             case 'l':
                 if p1[0] > xmin:
@@ -56,6 +58,14 @@ def clip_againt_edge(curr_polygon, edge):
                         clipped_polygon.append(
                             compute_intersection(p1, p2, edge)
                         )
+                else:
+                    # first point outside
+                    if p2[0] > xmin:
+                        # second point inside
+                        clipped_polygon.append(
+                            compute_intersection(p1, p2, edge)
+                        )
+                        clipped_polygon.append(p2)
             
             case 'r':
                 if p1[0] < xmax:
@@ -68,6 +78,14 @@ def clip_againt_edge(curr_polygon, edge):
                         clipped_polygon.append(
                             compute_intersection(p1, p2, edge)
                         )
+                else:
+                    # first point outside
+                    if p2[0] < xmax:
+                        # second point inside
+                        clipped_polygon.append(
+                            compute_intersection(p1, p2, edge)
+                        )
+                        clipped_polygon.append(p2)
             
             case 'b':
                 if p1[1] > ymin:
@@ -80,6 +98,14 @@ def clip_againt_edge(curr_polygon, edge):
                         clipped_polygon.append(
                             compute_intersection(p1, p2, edge)
                         )
+                else:
+                    # first point outside
+                    if p2[1] > ymin:
+                        # second point inside
+                        clipped_polygon.append(
+                            compute_intersection(p1, p2, edge)
+                        )
+                        clipped_polygon.append(p2)
 
             case 't':
                 if p1[1] < ymax:
@@ -92,20 +118,46 @@ def clip_againt_edge(curr_polygon, edge):
                         clipped_polygon.append(
                             compute_intersection(p1, p2, edge)
                         )
+                else:
+                    # first point outside
+                    if p2[1] < ymax:
+                        # second point inside
+                        clipped_polygon.append(
+                            compute_intersection(p1, p2, edge)
+                        )
+                        clipped_polygon.append(p2)
 
     return clipped_polygon
 
-def sutherland_hodgman_polygon_clip():
+def sutherland_hodgman_polygon_clip(polygon):
     clip_polygon = deepcopy(polygon)
 
     # codes for each edge
     for edge in ['l', 'r', 'b', 't']:
         clip_polygon = clip_againt_edge(clip_polygon, edge)
-
+        # print(edge, clip_polygon)
+    
     return clip_polygon
 
 def draw_clipped_polygon():
-    NotImplemented
+    clip_polygon = sutherland_hodgman_polygon_clip(polygon)
+    print(clip_polygon)
+    
+    glBegin(GL_POLYGON)
+    # draw the original polygon
+    glColor3f(1.0, 0.0, 0.0)
+    for vertex in polygon:
+        glVertex2f(*vertex)
+    glEnd()
+
+    glBegin(GL_POLYGON)
+    # draw the clipped polygon
+    glColor3f(0.0, 1.0, 0.0)
+    for vertex in clip_polygon:
+        glVertex2f(*vertex)
+    glEnd()
+
+    glFlush()
 
 
 def viewport():
@@ -150,8 +202,10 @@ def main():
     initialize()
     
     # viewport_coordinates = (-300, 100, -100, 300)
-    
-    
+    global polygon
+    # polygon = [(165, 20), (25, 20), (25, 200), (150, 200)]
+    # polygon = [(165, 20), (25, 20), (25, 400), (450, 400)]
+    polygon = [(165, 20), (25, 20), (25, -200)]
     
     glutDisplayFunc(draw_clipped_polygon)
     glutMainLoop()
