@@ -23,3 +23,23 @@ In this class we are assuming that all vectors are represented as a column vecto
 Thereore, when multiply the trabsformation matrices, make sure that the first transformation step is on the
 most righthand side part
 
+
+3D Transformation
+^ The matrix is 4x3 (homogenous representation)
+
+
+For rotation
+Counter-clockwise rotation is positive; you are standing on the axis and looking at the origin
+
+[[cos(theta), -sin(theta)],
+ [cos(theta),  sin(theta)]]
+
+T_theta^y is not the same,,, the negative signs switch up -> figure out the reason
+
+
+To perform general transformation about an arbitrary line
+then we rotate the line to be in the same plane as the z-axis (about one of the axes planes)*
+then we rotate to match the line to be aligned with z-axis
+
+*if we rotate about the x-axis, it places the line in x-z plane; about y-axis places it in the y-z plane
+
