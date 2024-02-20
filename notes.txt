@@ -32,7 +32,7 @@ For rotation
 Counter-clockwise rotation is positive; you are standing on the axis and looking at the origin
 
 [[cos(theta), -sin(theta)],
- [cos(theta),  sin(theta)]]
+ [sin(theta),  cos(theta)]]
 
 T_theta^y is not the same,,, the negative signs switch up -> figure out the reason
 
