@@ -6,8 +6,8 @@ from OpenGL.GLU import *
 import numpy as np
 
 # Control points
-# P = np.array([[100.0, 100.0], [150.0, 200.0], [250.0, 200.0], [300.0, 100.0]])
-P = np.array([[150.0, 100.0], [150.0, 200.0], [250.0, 200.0], [250.0, 100.0]])
+P = np.array([[100.0, 100.0], [150.0, 200.0], [250.0, 200.0], [300.0, 100.0]])
+# P = np.array([[150.0, 100.0], [150.0, 200.0], [250.0, 200.0], [250.0, 100.0]])
 
 # Function to calculate Bezier curve point at t
 def bezier(t):
