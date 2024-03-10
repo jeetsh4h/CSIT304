@@ -3,71 +3,109 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-x_left = -10; x_right = 10; y_bottom = -10; y_top = 10
 
-radius = 3; n_points = 1024
+def draw_circle_with_pizza_slice():
+    radius = 2
+    num_segments = 32
+    center = [2, 2]
 
-end_angle = np.pi / 4; start_angle = 0
+    # pizza_slice_angle = (0, (3 * np.pi) / 8)
+    # pizza_slice_angle = ((3 * np.pi) / 8, (5 * np.pi) / 8)
+    pizza_slice_angle = ((-1 * np.pi) / 8, (1 * np.pi) / 8)
+    slice_offset = 0.5
 
-def draw_para_circle():
-    dtheta = (2 * np.pi) / n_points
-    
-    glPointSize(2.0)
-    glBegin(GL_POINTS)
-    glColor3f(0.0, 0.0, 0.0)    # black
-    for theta in np.arange(0, 2*np.pi + 0.001, dtheta):
-        x = radius * np.cos(theta)
-        y = radius * np.sin(theta)
-        
-        glVertex2f(x, y)
+    if pizza_slice_angle[0] > pizza_slice_angle[1]:
+        pizza_slice_angle = tuple(reversed(pizza_slice_angle))
+
+# calculating points of the rest of the pizza
+    pizza_points = [[0, 0, 1]]  # adding the center of the origin circle
+    for angle in np.arange(
+        pizza_slice_angle[1],
+        (2 * np.pi) + pizza_slice_angle[0] + 0.01,
+        (2 * np.pi) / num_segments,
+    ):
+        x = radius * np.cos(angle)
+        y = radius * np.sin(angle)
+        pizza_points.append([x, y, 1])
+
+# calculating points of the pizza slice
+    slice_points = [[0, 0, 1]]  # adding the center of the origin circle
+    for angle in np.arange(
+        pizza_slice_angle[0], 
+        pizza_slice_angle[1] + 0.1, 
+        (2 * np.pi) / num_segments
+    ):
+        x = radius * np.cos(angle)
+        y = radius * np.sin(angle)
+        slice_points.append([x, y, 1])
+
+# translating along the line drawn from the origin and the center of the pizza slice arc
+    grad = np.tan(sum(pizza_slice_angle) / 2)
+    tx = slice_offset
+    ty = slice_offset * grad 
+    if (np.abs(sum(pizza_slice_angle) / 2) == np.pi / 2) or (np.abs(sum(pizza_slice_angle) / 2) == (3 * np.pi) / 2): 
+        tx = 0
+        ty = slice_offset
+
+    translate_slice = np.array(
+            [[1, 0, tx],
+             [0, 1, ty],
+             [0, 0, 1 ]]
+        )
+
+# translating all the points to the appropriate pizza center
+    translate_all = np.array(
+        [[1, 0, center[0]], 
+         [0, 1, center[1]], 
+         [0, 0, 1        ]]
+    )
+
+# rendering pizza
+    glBegin(GL_LINE_LOOP)
+    for point in np.array(pizza_points):
+        translated_point = translate_all @ point.T
+
+        print(translated_point[:-1])
+        glVertex2f(*translated_point[:-1])
+
     glEnd()
 
-def pizza_slice():
-    draw_para_circle()
-
-    assert start_angle < end_angle, "start_angle must be less than end_angle"
-    
-    grad = np.tan((start_angle + end_angle) / 2)
-
-    glPointSize(2.0)
-    glBegin(GL_POINTS)
-    glColor3f(1.0, 0.5, 0.0)    # orange
-    for theta in np.arange(start_angle, end_angle + 0.001, 0.001):
-        x = radius * np.cos(theta)
-        y = radius * np.sin(theta)
+# rendering pizza slice
+    glBegin(GL_LINE_LOOP)
+    for point in np.array(slice_points):
+        translated_point = translate_all @ translate_slice @ point.T
         
-        glVertex2f(x + 0.5, y + (0.5 * grad))    # translating
+        print(translated_point[:-1])
+        glVertex2f(*translated_point[:-1])
 
     glEnd()
+
     glFlush()
 
 
 def axes():
-# clear screen
     glClear(GL_COLOR_BUFFER_BIT)
 
-# draw axes
+    # draw axes
     glLineWidth(1.0)
     glBegin(GL_LINES)
-    glColor3f(0.0, 0.0, 0.0)    # black
+    glColor3f(0.0, 0.0, 0.0)  # black
 
     # x-axis
-    glVertex2f(x_left, 0)
-    glVertex2f(x_right, 0)
+    glVertex2f(10, 0)
+    glVertex2f(-10, 0)
 
     # y-axis
-    glVertex2f(0, y_bottom)
-    glVertex2f(0, y_top)
+    glVertex2f(0, 10)
+    glVertex2f(0, -10)
 
     glEnd()
 
 def initialize():
-    glClearColor(1.0, 1.0, 1.0, 1.0)    # bg color white
+    glClearColor(1.0, 1.0, 1.0, 1.0)  # Set the background color to white
 
-    # screen size, in terms of co-ordinates
-    gluOrtho2D(x_left, x_right, y_bottom, y_top)
+    gluOrtho2D(-10, 10, -10, 10)
     axes()
-
 
 def main():
     glutInit(sys.argv)
@@ -76,13 +114,12 @@ def main():
     glutInitWindowSize(500, 500)
     glutInitWindowPosition(1000, 0)
 
-    glutCreateWindow("Clipped Triangles")
+    glutCreateWindow("Parametric Circle")
     initialize()
 
-    glutDisplayFunc(pizza_slice)
+    glutDisplayFunc(draw_circle_with_pizza_slice)
 
     glutMainLoop()
-
 
 if __name__ == "__main__":
     main()

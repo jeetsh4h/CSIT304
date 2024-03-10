@@ -4,15 +4,35 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
 
-def draw_sector():
-    glBegin(GL_LINE_STRIP)
+def draw_circle_parametrically():
+    radius = 2
+    num_segments = 8
+    angle = 2 * np.pi / num_segments
+    center = [2, 2]
 
-    for x in np.arange(0., 1.1, 0.1):
-        y = (1 - x * x)**0.5
-        print(x, y)
-        glVertex2f(x, y)
+
+    circle_points = []
+    for i in range(num_segments + 1):
+        x = radius * np.cos(i * angle)
+        y = radius * np.sin(i * angle)
+        circle_points.append([x, y, 1])
+
+    translate = np.array(
+        [[1, 0, center[0]],
+         [0, 1, center[1]],
+         [0, 0, 1        ]]
+    )
+
+
+    glBegin(GL_LINE_STRIP)
+    for point in np.array(circle_points):
+        translated_point = translate @ point.T
+
+        print(translated_point[:-1])
+        glVertex2f(*translated_point[:-1])
 
     glEnd()
+
     glFlush()
 
 
@@ -50,7 +70,8 @@ def main():
     glutCreateWindow("Parametric Circle")
     initialize()
 
-    glutDisplayFunc(draw_sector)
+    glutDisplayFunc(draw_circle_parametrically)
+
     glutMainLoop()
 
 
