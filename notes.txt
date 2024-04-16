@@ -43,3 +43,10 @@ then we rotate to match the line to be aligned with z-axis
 
 *if we rotate about the x-axis, it places the line in x-z plane; about y-axis places it in the y-z plane
 
+
+
+Wordle 1,032 3/6
+
+🟩⬛🟩⬛⬛
+🟩⬛🟩🟩🟩
+🟩🟩🟩🟩🟩
