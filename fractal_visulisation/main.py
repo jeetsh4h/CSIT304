@@ -7,8 +7,12 @@ from OpenGL.GLUT import *
 
 window_width = None
 window_height = None
+
 ortho_proj = (-1.0, 1.0, -1.0, 1.0)
+
 MAX_ITER = 100
+
+MOUSE_DOWN = False
 
 
 def mandlebrot(x, y):
@@ -85,26 +89,7 @@ def display():
 
 
 def zoom(button, state, x, y):    
-    if button == GLUT_LEFT_BUTTON and state == GLUT_DOWN:
-        window_width = glutGet(GLUT_WINDOW_WIDTH)
-        window_height = glutGet(GLUT_WINDOW_HEIGHT)
-
-        ortho_x_start = ortho_proj[0] + x / window_width * (ortho_proj[1] - ortho_proj[0])
-        ortho_y_start = ortho_proj[2] + (window_height - y) / window_height * (ortho_proj[3] - ortho_proj[2])
-        
-        print(ortho_x_start, ortho_y_start)
-
-    if button == GLUT_LEFT_BUTTON and state == GLUT_UP:
-        window_width = glutGet(GLUT_WINDOW_WIDTH)
-        window_height = glutGet(GLUT_WINDOW_HEIGHT)
-
-        ortho_x_end = ortho_proj[0] + x / window_width * (ortho_proj[1] - ortho_proj[0])
-        ortho_y_end = ortho_proj[2] + (window_height - y) / window_height * (ortho_proj[3] - ortho_proj[2])
-
-        print(ortho_x_end, ortho_y_end)
-
-    print()
-
+    NotImplemented
 
 
 def init():
