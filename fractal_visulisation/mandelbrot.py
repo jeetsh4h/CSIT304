@@ -9,10 +9,10 @@ window_width = None
 window_height = None
 
 ortho_proj = (-1.0, 1.0, -1.0, 1.0)
+MOUSE_DOWN = False
+MOUSE_DOWN_COORDS = (None, None)
 
 MAX_ITER = 100
-
-MOUSE_DOWN = False
 
 
 def mandlebrot(x, y):
@@ -32,7 +32,11 @@ def mandlebrot(x, y):
     # for smoother colors
     return n + 1 - np.log(np.log2(abs(z)))
 
+
 def display():
+    if MOUSE_DOWN:
+        pass
+
     glClear(GL_COLOR_BUFFER_BIT)
 
     # Get the window width and height
@@ -89,7 +93,43 @@ def display():
 
 
 def zoom(button, state, x, y):    
-    NotImplemented
+    global MOUSE_DOWN, MOUSE_DOWN_COORDS, ortho_proj, window_height, window_width
+    if button == GLUT_LEFT_BUTTON and state == GLUT_DOWN:
+        if not MOUSE_DOWN:
+            MOUSE_DOWN = True
+            MOUSE_DOWN_COORDS = (x, y)
+    
+    if button == GLUT_LEFT_BUTTON and state == GLUT_UP:
+        if MOUSE_DOWN:
+            MOUSE_DOWN = False
+
+            scale_factor = (MOUSE_DOWN_COORDS[1] - y) / 15
+            scale_factor = 1.05 if 0 < scale_factor < 1 else scale_factor
+            scale_factor = -1.05 if -1 < scale_factor < 0 else scale_factor
+            
+            if scale_factor < 0:
+                print("Zooming in by a factor of:", abs(scale_factor))
+                scale_factor = 1 / abs(scale_factor)
+            else:
+                print("Zooming out by a factor of:", scale_factor)
+
+            mouse_down_ortho = (
+                ortho_proj[0] + MOUSE_DOWN_COORDS[0] / window_width * (ortho_proj[1] - ortho_proj[0]),
+                ortho_proj[2] + (window_height - MOUSE_DOWN_COORDS[1]) / window_height * (ortho_proj[3] - ortho_proj[2])
+            )
+
+            ortho_proj = (
+                ((ortho_proj[0] - (mouse_down_ortho[0] / 2)) * scale_factor) + (mouse_down_ortho[0] / 2),
+                ((ortho_proj[1] - (mouse_down_ortho[0] / 2)) * scale_factor) + (mouse_down_ortho[0] / 2),
+                ((ortho_proj[2] - (mouse_down_ortho[1] / 2)) * scale_factor) + (mouse_down_ortho[1] / 2),
+                ((ortho_proj[3] - (mouse_down_ortho[1] / 2)) * scale_factor) + (mouse_down_ortho[1] / 2)
+            )
+
+
+            print(ortho_proj)
+            gluOrtho2D(*ortho_proj)
+            
+            glutPostRedisplay()
 
 
 def init():
